@@ -119,10 +119,16 @@ func getDebugLogger(debug bool) *log.Logger {
 
 func handleRuuviAdvertisement(sr *host.ScanReport) {
 	for _, ads := range sr.Data {
+		log.Printf("%x: %x", sr.Address, ads.Data)
 		ruuviData, err := ruuvi.Decode(ads.Data)
 		if err != nil {
+			if len(ads.Data) == 1 {
+				continue
+			}
 			log.Printf("Unable to parse ruuvi data: %v; ads.Data=%x, len=%d, address=%x", err, ads.Data, len(ads.Data), sr.Address)
 			continue
+		} else {
+			log.Printf("Read ruuvi data from addr=%x: %+v", sr.Address, ruuviData)
 		}
 
 		reading := metrics.RuuviReading{ScanReport: sr, Data: ruuviData}

@@ -89,6 +89,11 @@ var (
 		Name: "ruuvi_seqno_current",
 		Help: "Ruuvi frame sequence number",
 	}, []string{"device"})
+
+	lastUpdated = promauto.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "ruuvi_last_updated",
+		Help: "Ruuvi last update UNIX timestamp",
+	}, []string{"device"})
 )
 
 // ttl is the duration after which sensors are forgotten if signal is lost.
@@ -143,6 +148,7 @@ func ObserveRuuvi(o RuuviReading) {
 	if o.SeqnoValid() {
 		seqno.WithLabelValues(addr).Set(float64(o.Seqno))
 	}
+	lastUpdated.WithLabelValues(addr).Set(float64(time.Now().Unix()))
 }
 
 func clearExpired() {
