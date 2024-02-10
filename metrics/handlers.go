@@ -26,6 +26,7 @@ package metrics
 
 import (
 	"net/http"
+	"net/http/pprof"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
@@ -35,6 +36,7 @@ var Handler = http.NewServeMux()
 func init() {
 	Handler.HandleFunc("/", handleRoot)
 	Handler.Handle("/metrics", promhttp.Handler())
+	Handler.HandleFunc("/debug/pprof/profile", pprof.Profile)
 }
 
 const rootContent = `ruuvi-prometheus exporter
