@@ -25,6 +25,7 @@
 package metrics
 
 import (
+	"math"
 	"sync"
 	"time"
 
@@ -48,6 +49,11 @@ var (
 	temperature = promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "ruuvi_temperature_celsius",
 		Help: "Ruuvi tag sensor temperature",
+	}, []string{"device"})
+
+	dewPoint = promauto.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "ruuvi_dew_point_celsius",
+		Help: "Ruuvi tag dew point temperature",
 	}, []string{"device"})
 
 	pressure = promauto.NewGaugeVec(prometheus.GaugeOpts{
@@ -112,6 +118,18 @@ func init() {
 	}()
 }
 
+const B = 17.368
+const C = 238.88
+
+func gamma(t float64, rh float64) float64 {
+	return math.Log(rh/100.0) + B*t/(C+t)
+}
+
+func dewPointCalc(t float64, rh float64) float64 {
+	g := gamma(t, rh)
+	return C * g / (B - g)
+}
+
 func ObserveRuuvi(o RuuviReading) {
 	addr := o.Address.String()
 
@@ -129,6 +147,9 @@ func ObserveRuuvi(o RuuviReading) {
 	}
 	if o.TemperatureValid() {
 		temperature.WithLabelValues(addr).Set(float64(o.Temperature))
+		if o.HumidityValid() {
+			dewPoint.WithLabelValues(addr).Set(dewPointCalc(float64(o.Temperature), float64(o.Humidity)))
+		}
 	}
 	if o.HumidityValid() {
 		humidity.WithLabelValues(addr).Set(float64(o.Humidity) / 100)
