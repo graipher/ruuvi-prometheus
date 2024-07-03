@@ -187,6 +187,7 @@ func clearExpired() {
 			pressure.DeleteLabelValues(addr)
 			temperature.DeleteLabelValues(addr)
 			humidity.DeleteLabelValues(addr)
+			dewPoint.DeleteLabelValues(addr)
 			acceleration.DeleteLabelValues(addr, "X")
 			acceleration.DeleteLabelValues(addr, "Y")
 			acceleration.DeleteLabelValues(addr, "Z")
