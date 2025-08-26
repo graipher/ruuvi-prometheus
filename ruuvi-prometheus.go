@@ -29,7 +29,6 @@ package main
 import (
 	"context"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -59,7 +58,7 @@ func main() {
 
 	if !cmdline.debug {
 		// FIXME: bluewalker outputs to global logger so we need to discard all log globally
-		log.SetOutput(ioutil.Discard)
+		log.SetOutput(io.Discard)
 	}
 
 	server := http.Server{
@@ -112,7 +111,7 @@ func main() {
 func getDebugLogger(debug bool) *log.Logger {
 	var output io.Writer = os.Stderr
 	if !debug {
-		output = ioutil.Discard
+		output = io.Discard
 	}
 	return log.New(output, "DEBUG: ", log.LstdFlags)
 }
