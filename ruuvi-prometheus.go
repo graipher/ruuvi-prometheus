@@ -34,10 +34,10 @@ import (
 	"os"
 	"os/signal"
 
+	"github.com/graipher/bluewalker/host"
+	"github.com/graipher/bluewalker/ruuvi"
 	"github.com/joneskoo/ruuvi-prometheus/bluetooth"
 	"github.com/joneskoo/ruuvi-prometheus/metrics"
-	"gitlab.com/jtaimisto/bluewalker/host"
-	"gitlab.com/jtaimisto/bluewalker/ruuvi"
 )
 
 const (

@@ -100,4 +100,4 @@ can create Raspberry appliance image without any C code besides Linux.
 * Linux
 * Bluetooth LE; bluetoothd must not be running.
 
-[bluewalker]: https://gitlab.com/jtaimisto/bluewalker/
+[bluewalker]: https://github.com/graipher/bluewalker/

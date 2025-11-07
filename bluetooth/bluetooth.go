@@ -33,9 +33,9 @@ import (
 	"fmt"
 	"sync"
 
-	"gitlab.com/jtaimisto/bluewalker/filter"
-	"gitlab.com/jtaimisto/bluewalker/hci"
-	"gitlab.com/jtaimisto/bluewalker/host"
+	"github.com/graipher/bluewalker/filter"
+	"github.com/graipher/bluewalker/hci"
+	"github.com/graipher/bluewalker/host"
 )
 
 // Scanner scans for Bluetooth LE advertisements.

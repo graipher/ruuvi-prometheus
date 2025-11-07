@@ -29,10 +29,10 @@ import (
 	"sync"
 	"time"
 
+	"github.com/graipher/bluewalker/host"
+	"github.com/graipher/bluewalker/ruuvi"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
-	"gitlab.com/jtaimisto/bluewalker/host"
-	"gitlab.com/jtaimisto/bluewalker/ruuvi"
 )
 
 var (
