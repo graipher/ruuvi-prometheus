@@ -78,7 +78,7 @@ var (
 
 	format = promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "ruuvi_format",
-		Help: "Ruuvi frame format version (e.g. 3 or 5)",
+		Help: "Ruuvi frame format version (e.g. 3, 5 or 6)",
 	}, []string{"device"})
 
 	txPower = promauto.NewGaugeVec(prometheus.GaugeOpts{
@@ -99,6 +99,31 @@ var (
 	lastUpdated = promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "ruuvi_last_updated",
 		Help: "Ruuvi last update UNIX timestamp",
+	}, []string{"device"})
+
+	pm2_5 = promauto.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "ruuvi_pm2_5_ug_m3",
+		Help: "Ruuvi PM2.5 concentration in ug/m3",
+	}, []string{"device"})
+
+	co2 = promauto.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "ruuvi_co2_ppm",
+		Help: "Ruuvi CO2 concentration in ppm",
+	}, []string{"device"})
+
+	voc = promauto.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "ruuvi_voc_index",
+		Help: "Ruuvi VOC index",
+	}, []string{"device"})
+
+	nox = promauto.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "ruuvi_nox_index",
+		Help: "Ruuvi NOx index",
+	}, []string{"device"})
+
+	calibrating = promauto.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "ruuvi_air_calibrating",
+		Help: "Ruuvi calibrating",
 	}, []string{"device"})
 )
 
@@ -128,6 +153,18 @@ func gamma(t float64, rh float64) float64 {
 func dewPointCalc(t float64, rh float64) float64 {
 	g := gamma(t, rh)
 	return C * g / (B - g)
+}
+
+func Bool2int(b bool) int {
+	// The compiler currently only optimizes this form.
+	// See issue 6011.
+	var i int
+	if b {
+		i = 1
+	} else {
+		i = 0
+	}
+	return i
 }
 
 func ObserveRuuvi(o RuuviReading) {
@@ -169,6 +206,21 @@ func ObserveRuuvi(o RuuviReading) {
 	if o.SeqnoValid() {
 		seqno.WithLabelValues(addr).Set(float64(o.Seqno))
 	}
+	if o.PM2_5Valid() {
+		pm2_5.WithLabelValues(addr).Set(float64(o.PM2_5))
+	}
+	if o.CO2Valid() {
+		co2.WithLabelValues(addr).Set(float64(o.CO2))
+	}
+	if o.VOCValid() {
+		voc.WithLabelValues(addr).Set(float64(o.VOC))
+	}
+	if o.NOXValid() {
+		nox.WithLabelValues(addr).Set(float64(o.NOX))
+	}
+	if o.DataFormat() == 6 {
+		calibrating.WithLabelValues(addr).Set(float64(Bool2int(o.Calibrating)))
+	}
 	lastUpdated.WithLabelValues(addr).Set(float64(time.Now().Unix()))
 }
 
@@ -195,6 +247,10 @@ func clearExpired() {
 			txPower.DeleteLabelValues(addr)
 			moveCount.DeleteLabelValues(addr)
 			seqno.DeleteLabelValues(addr)
+			pm2_5.DeleteLabelValues(addr)
+			co2.DeleteLabelValues(addr)
+			voc.DeleteLabelValues(addr)
+			nox.DeleteLabelValues(addr)
 
 			delete(deviceLastSeen, addr)
 		}
@@ -212,6 +268,8 @@ type RuuviReading struct {
 func (r RuuviReading) DataFormat() int {
 	if !r.TxPowerValid() && !r.MoveCountValid() && !r.SeqnoValid() {
 		return 3
+	} else if r.CO2Valid() {
+		return 6
 	} else {
 		return 5
 	}
